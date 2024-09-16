@@ -19,6 +19,17 @@ func AddTodo(task string) {
 	fmt.Printf("Tarea '%s' creada con ID %s\n", task, todo.ID)
 }
 
+func RemoveTodoByID(id string) {
+	for i, todo := range todos {
+		if todo.ID == id {
+			todos = append(todos[:i], todos[i+1:]...)
+			fmt.Printf("Tarea '%s' eliminada\n", todo.Task)
+			return
+		}
+	}
+	fmt.Printf("No se encontró tarea con ID %s\n", id)
+}
+
 func ListTodos() {
 	if len(todos) == 0 {
 		fmt.Println("No hay tareas.")
