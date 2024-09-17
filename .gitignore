@@ -29,3 +29,8 @@ go.work.sum
 .vscode/
 *.swp
 *.swo
+
+# SQLite database file
+*.db
+*.sqlite
+*.sqlite3

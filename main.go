@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	todo.InitDB("todos.db")
+	todo.InitDB("todos.sqlite3")
 
 	if len(os.Args) < 2 {
 		fmt.Println("Uso: todo <comando> [argumentos]")

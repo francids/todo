@@ -20,16 +20,8 @@ Lista todas las tareas.
 todo list
 ```
 
-## Ejemplos
-
-Crear una nueva tarea:
+Elimina una tarea.
 
 ```sh
-todo new "Comprar pan"
-```
-
-Listar todas las tareas:
-
-```sh
-todo list
+todo remove <id>
 ```
