@@ -1,8 +1,12 @@
 package todo
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"todo/utils"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Todo struct {
@@ -10,32 +14,76 @@ type Todo struct {
 	Task string
 }
 
-var todos []Todo
+var db *sql.DB
+
+func InitDB(filepath string) {
+	var err error
+	db, err = sql.Open("sqlite3", filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	createTableSQL := `CREATE TABLE IF NOT EXISTS todos (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "task" TEXT
+    );`
+
+	_, err = db.Exec(createTableSQL)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func AddTodo(task string) {
 	id := utils.GenerateID(task)
 	todo := Todo{ID: id, Task: task}
-	todos = append(todos, todo)
+
+	insertTodoSQL := `INSERT INTO todos(id, task) VALUES (?, ?)`
+	statement, err := db.Prepare(insertTodoSQL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(todo.ID, todo.Task)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Printf("Tarea '%s' creada con ID %s\n", task, todo.ID)
 }
 
 func RemoveTodoByID(id string) {
-	for i, todo := range todos {
-		if todo.ID == id {
-			todos = append(todos[:i], todos[i+1:]...)
-			fmt.Printf("Tarea '%s' eliminada\n", todo.Task)
-			return
-		}
+	deleteTodoSQL := `DELETE FROM todos WHERE id = ?`
+	statement, err := db.Prepare(deleteTodoSQL)
+	if err != nil {
+		log.Fatal(err)
 	}
-	fmt.Printf("No se encontró tarea con ID %s\n", id)
+	result, err := statement.Exec(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if rowsAffected == 0 {
+		fmt.Printf("No se encontró tarea con ID %s\n", id)
+	} else {
+		fmt.Printf("Tarea con ID %s eliminada\n", id)
+	}
 }
 
 func ListTodos() {
-	if len(todos) == 0 {
-		fmt.Println("No hay tareas.")
-		return
+	row, err := db.Query("SELECT id, task FROM todos")
+	if err != nil {
+		log.Fatal(err)
 	}
-	for _, todo := range todos {
-		fmt.Printf("%s: %s\n", todo.ID, todo.Task)
+	defer row.Close()
+
+	for row.Next() {
+		var id, task string
+		row.Scan(&id, &task)
+		fmt.Printf("%s: %s\n", id, task)
 	}
 }
