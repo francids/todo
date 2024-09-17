@@ -1,37 +1,14 @@
 package todo
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"todo/utils"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type Todo struct {
 	ID   string
 	Task string
-}
-
-var db *sql.DB
-
-func InitDB(filepath string) {
-	var err error
-	db, err = sql.Open("sqlite3", filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	createTableSQL := `CREATE TABLE IF NOT EXISTS todos (
-        "id" TEXT NOT NULL PRIMARY KEY,
-        "task" TEXT
-    );`
-
-	_, err = db.Exec(createTableSQL)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func AddTodo(task string) {
